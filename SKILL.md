@@ -279,3 +279,27 @@ While original Xbox games target 32-bit x86 and PlayStation/N64 games target MIP
 | **Hardware Shim** | NV2A pushbuffer -> Direct3D 11 / Vulkan | GPU packets + GTE coprocessor -> SDL3 / OpenGL / D3D | RDP display lists -> modern graphics |
 | **Audio Subsystem** | APU / AC97 MMIO register trapping | SPU (24 ADPCM voices) + CD-DA audio stream | RCP / RSP audio microcode synthesis |
 
+---
+
+## 10. Graphical Configuration Launcher & Clean Distribution Standards
+
+### A. Standalone Zero-Dependency GUI Launcher (`Launcher.exe`)
+Players expect a seamless PC gaming experience before launching a recompiled console port. Provide a dedicated graphical configuration launcher compiled into a tiny, self-contained binary (~25 KB):
+- **Zero External Dependencies:** Compile a C# Windows Forms application using Windows' built-in .NET Framework compiler (`C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /target:winexe /optimize+ /platform:anycpu`). This ensures immediate execution across all Windows 7, 10, and 11 systems without requiring Python, Visual C++ Redistributables, or third-party frameworks.
+- **Configurable Subsystems:**
+  1. **Display & Resolution:** Windowed, Borderless Fullscreen, Exclusive Fullscreen, Resolution presets (800x600 up to 4K UHD), and Aspect Ratio toggles (4:3 Classic, 16:9 Widescreen, 21:9 Ultrawide).
+  2. **Performance & FPS:** Target refresh rate (30, 60, 120, 144, 240 FPS via `PSX_HOST_REFRESH_HZ`), V-Sync (On/Off/Adaptive), Low-Latency Input, Multi-threaded Render Pipeline, and Fast-Forward multiplier (`PSX_FAST_FORWARD_SPEED`).
+  3. **Controls & Gamepad:** Automatic detection (`p1_device = "auto"`), DualShock Analog Stick vs Digital D-Pad selection, and Analog Deadzone sliders (5% to 30%).
+  4. **Save Data Management:** One-click shortcut to inspect and backup memory card save files (`card1.mcd`, `card2.mcd`).
+
+### B. Batch File (`.bat`) Hygiene in Windows CMD
+When writing friendly launcher batch files (`Play_Game.bat`):
+1. **Never use unescaped parentheses inside `if (...)` compound blocks:** If text or file names contain parentheses (such as `Harvest Moon - Back to Nature (USA).cue`), the closing parenthesis `)` will prematurely terminate the CMD parser block, producing cryptic errors like `.cue was unexpected at this time`.
+2. **Never place label comments (`::`) inside parentheses:** Use standard `rem` or prefer branching logic with `goto :label` over nested `if (...)` blocks.
+
+### C. Clean-Room Assetless Distribution
+Always preserve a strictly legal distribution package:
+- Distribute binaries, OpenBIOS/HLE shims, launcher, and configuration files only.
+- Exclude copyrighted ISO/BIN/CUE/CHD discs from version control and release zips.
+- Provide a dedicated `game/` drop folder with an instructional marker file (`TEMPATKAN_FILE_DISC_DISINI.txt`) for user-supplied game dumps.
+
