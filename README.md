@@ -1,4 +1,4 @@
-# Xbox Game Static Recompilation Skill (`xbox-game-static-recomp`)
+# Game Static Recompilation Skill (`game-recompiler`)
 
 Complete playbook and Standard Operating Procedure (SOP) for statically recompiling original Xbox (2001) games to native PC (Windows, macOS, Linux, and Steam Deck) using the `xboxrecomp` toolkit.
 
@@ -13,7 +13,7 @@ This skill teaches AI coding assistants (Antigravity, Gemini CLI, Claude Code, C
 ## 📂 Repository Contents
 
 ```text
-xbox-game-static-recomp/
+game-recompiler/
 ├── SKILL.md                                 # Core agent skill instruction and architecture playbook
 ├── README.md                                # Project overview and installation guide
 ├── references/
@@ -61,14 +61,14 @@ xbox-game-static-recomp/
 ### Antigravity / Gemini CLI:
 Clone or copy this folder into your skills configuration directory:
 ```bash
-git clone https://github.com/rivaldiekaptrrr/xbox-game-static-recomp.git ~/.gemini/config/skills/xbox-game-static-recomp
+git clone https://github.com/rivaldiekaptrrr/game-recompiler.git ~/.gemini/config/skills/game-recompiler
 ```
 
 ### Claude Code / Codex:
 Copy `SKILL.md` into your `.claude/skills/` or `.codex/skills/` directory:
 ```bash
-mkdir -p .claude/skills/xbox-game-static-recomp
-cp SKILL.md .claude/skills/xbox-game-static-recomp/
+mkdir -p .claude/skills/game-recompiler
+cp SKILL.md .claude/skills/game-recompiler/
 ```
 
 ---

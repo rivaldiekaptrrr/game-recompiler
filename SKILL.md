@@ -1,5 +1,5 @@
 ---
-name: xbox-game-static-recomp
+name: game-recompiler
 description: Complete end-to-end playbook and standard operating procedure for statically recompiling original Xbox and classic console games to native PC (Windows, macOS, Linux/Steam Deck) using static recompilation toolchains (xboxrecomp, psxrecomp, N64Recomp). Use when porting console games, diagnosing bring-up crashes (S0-S4), solving MSVC compiler traps (C11 atomics, GCC built-ins, lambda constexpr), managing split-TU sharding, configuring AOT analysis/lifting pipelines, implementing hardware MMIO shims (NV2A, PSX GPU/SPU, APU, AC97), writing manual C overrides, handling indirect calls (ICALL), or adding modern PC enhancements (widescreen Hor+, 60fps, texture mods, controller input).
 ---
 
