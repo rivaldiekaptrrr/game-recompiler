@@ -118,3 +118,4 @@ For generic Bluetooth gamepads like the **X3 Gamepad**:
    `Xbox Wireless Controller (Status: OK)`
 3. Ensure no background mapper (like Steam Input Desktop layout or DS4Windows) is intercepting or suppressing exclusive device handles.
 4. Launch the recompiled executable; SDL will automatically bind to the controller.
+
