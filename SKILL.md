@@ -303,3 +303,28 @@ Always preserve a strictly legal distribution package:
 - Exclude copyrighted ISO/BIN/CUE/CHD discs from version control and release zips.
 - Provide a dedicated `game/` drop folder with an instructional marker file (`TEMPATKAN_FILE_DISC_DISINI.txt`) for user-supplied game dumps.
 
+### D. User-Friendly Gamepad & Keyboard Exit Handling
+Traditional console games lacked an "Exit to Desktop" menu. For native PC ports, implement ergonomic exit triggers directly in the main event loop (`SDL_PollEvent`):
+1. **Gamepad-Only Exit (Couch Gaming):**
+   - Intercept simultaneous chord `Select (Back) + Start` or `Xbox Guide / Home` button on `SDL_CONTROLLERBUTTONDOWN`.
+2. **Keyboard Single-Key Exit:**
+   - Intercept `SDLK_ESCAPE` on `SDL_KEYDOWN`.
+3. **Save-Protection Confirmation Prompt (`SDL_ShowMessageBox`):**
+   - Never abruptly kill the process on a single accidental keystroke. Show a native confirmation dialog warning the player about unsaved diary/save points:
+   ```cpp
+   const SDL_MessageBoxButtonData buttons[] = {
+       { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Exit" },
+       { SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 0, "Cancel" },
+   };
+   const SDL_MessageBoxData mb = {
+       SDL_MESSAGEBOX_INFORMATION, sdl_window,
+       "Game Title", "Exit game? Ensure your progress is saved.",
+       2, buttons, NULL
+   };
+   int button = 0;
+   if (SDL_ShowMessageBox(&mb, &button) == 0 && button == 1) {
+       shutdown_runtime();
+       std::exit(0);
+   }
+   ```
+
