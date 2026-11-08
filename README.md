@@ -16,9 +16,13 @@ This skill teaches AI coding assistants (Antigravity, Gemini CLI, Claude Code, C
 xbox-game-static-recomp/
 ├── SKILL.md                                 # Core agent skill instruction and architecture playbook
 ├── README.md                                # Project overview and installation guide
-└── references/
-    ├── bringup-checklist.md                 # Step-by-step verification checklist (S0 to S4)
-    └── troubleshooting-patterns.md          # Battle-tested fixes for common recompilation crashes
+├── references/
+│   ├── bringup-checklist.md                 # Step-by-step verification checklist (S0 to S4)
+│   ├── troubleshooting-patterns.md          # Battle-tested fixes for compiler traps, ICALL, and crashes
+│   └── controller-input-guide.md            # Comprehensive guide for Xbox/BT gamepad routing & mode config
+└── scripts/
+    ├── scaffold-new-port.py                 # Pure-Python scaffolder for original Xbox (XBE) ports
+    └── scaffold-psx-port.py                 # Scaffolder for PS1 games with auto-gamepad routing
 ```
 
 ---

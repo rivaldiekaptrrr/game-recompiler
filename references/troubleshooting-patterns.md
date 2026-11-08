@@ -235,4 +235,34 @@ A complete console game generates between 500,000 and 1,500,000+ lines of C code
 4. **Parallel Build:**
    With split TUs, compile with `cmake --build build --config Release --parallel` to fully utilize all CPU cores.
 
+---
+
+## 12. Gamepad Ignored / Defaulting to Keyboard in Release Builds
+
+### Symptom:
+A modern gamepad (Xbox Wireless Controller, Bluetooth X3/DirectInput, DualSense) is paired and connected with Windows, but the recompiled game completely ignores all gamepad buttons and sticks. Only the keyboard works.
+
+### Cause:
+In static recompilation runtimes (such as `psxrecomp`), release builds default Player 1 device assignment to `"keyboard"` unless explicitly instructed otherwise:
+```cpp
+#if defined(PSX_DEBUG_TOOLS)
+    player_device[0] = "auto";
+#else
+    player_device[0] = "keyboard"; // Release default
+#endif
+```
+When `player_device[0] == "keyboard"`, the runtime sets `player.kind = 1` and never calls `open_player()` or SDL gamepad enumeration routines.
+
+### Fix:
+1. Declare the `[controller]` block in `game.toml`:
+   ```toml
+   [controller]
+   p1_device = "auto"      # Automatically open the first connected physical gamepad
+   p1_mode = "analog"      # "analog" (DualShock) or "digital" (Standard pad)
+   deadzone = 3277         # ~10% radial deadzone
+   ```
+2. Verify that `input.ini` sits beside the executable with standard button bindings (`cross = a`, `circle = b`, `square = x`, `triangle = y`, etc.).
+3. If an older console game does not read DualShock analog packets (`id 0x73`), switch `p1_mode = "digital"` so the left stick folds directly onto D-Pad directional bits.
+
+
 

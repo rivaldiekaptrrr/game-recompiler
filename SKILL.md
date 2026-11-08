@@ -13,8 +13,13 @@ This skill provides the comprehensive architecture, pipeline procedures, and bri
 
 ## Bundled References
 When working through a bring-up or troubleshooting specific issues, refer to the following companion guides:
-- [Bring-Up Checklist (S0 to S4)](references/bringup-checklist.md): Step-by-step verification checklist from XBE extraction to a stable game loop.
-- [Common Troubleshooting Patterns](references/troubleshooting-patterns.md): Concrete diagnostics and fixes for ICALL failures, DSP audio hangs, pushbuffer fence spins, and arithmetic bugs.
+- [Bring-Up Checklist (S0 to S4)](references/bringup-checklist.md): Step-by-step verification checklist from binary extraction to a stable game loop.
+- [Common Troubleshooting Patterns](references/troubleshooting-patterns.md): Concrete diagnostics and fixes for ICALL failures, MSVC C11 atomics, gamepad input traps, DSP audio hangs, pushbuffer fence spins, and arithmetic bugs.
+- [Controller & Input Subsystem Guide](references/controller-input-guide.md): Complete guide for modern gamepad input (Xbox, Bluetooth X3, DualSense), `p1_device = "auto"`, digital vs analog mode switching, and `input.ini` mappings.
+
+## Bundled Scaffolding Tools
+- [Xbox Port Scaffolder](scripts/scaffold-new-port.py): Pure-Python CLI tool to generate a full C/CMake project scaffold from an Xbox `default.xbe`.
+- [PS1/PSX Port Scaffolder](scripts/scaffold-psx-port.py): CLI tool to parse PS-X EXE binaries, auto-generate `game.toml` with gamepad auto-detection, and produce hardened CMake configurations.
 
 ## 1. Core Architecture & Mental Model
 
