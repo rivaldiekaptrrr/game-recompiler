@@ -41,10 +41,14 @@ xbox-game-static-recomp/
    - S0 to S4 boot stages.
    - Resolving indirect call targets via `seed-from-log`.
    - Fixing GPU fence deadlocks, audio DSP doorbells, and 64-bit integer divide anomalies.
+   - **MSVC & Windows Build Diagnostics**: Handling C11 atomics (`/experimental:c11atomics`), resolving GCC/Clang built-in atomic incompatibilities with Win32 Interlocked APIs, bypassing MSVC C++17 lambda `static_assert` traps (`error C2131`), and path-with-spaces quoting.
+   - **Split-TU Sharding Strategy**: Managing massive generated codebases (~750k+ lines) to avoid compiler heap exhaustion (`C1002`) and enable multi-core parallel builds.
 5. **Modern PC Enhancements:**
    - Widescreen Hor+ camera projection math with 2D HUD element centering.
    - High-resolution / 4K upscaled texture replacement packs.
    - Modern gamepad support (Xbox, DualSense, Switch Pro) and in-game ImGui overlay.
+6. **Cross-Console Recompilation Architecture:**
+   - Comparative mapping between x86 (Xbox) and MIPS (PS1/PSX, N64) instruction lifting, function discovery (`jr $ra`), delay slots, and low-level BIOS/Kernel execution.
 
 ---
 

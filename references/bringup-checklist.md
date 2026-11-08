@@ -19,6 +19,7 @@ Use this checklist during the bring-up phase of a new Xbox game port.
 - [ ] Run `tools.abi_analysis` to determine calling conventions and parameter stack sizes.
 - [ ] Run `tools.recomp` with `--split 1000` to generate `src/recomp/gen/`.
 - [ ] Verify `recomp_dispatch.c` is generated.
+- [ ] Verify split-TU sharding: ensure code is partitioned into ~1,000-2,000 function shards to prevent compiler heap exhaustion (`C1002`).
 
 ---
 
@@ -32,6 +33,8 @@ Use this checklist during the bring-up phase of a new Xbox game port.
 - [ ] Initialize `g_esp = XBOX_STACK_TOP`.
 - [ ] Initialize D3D11 / Vulkan translator window.
 - [ ] Initialize APU / AC97 audio stubs.
+- [ ] Configure build system flags: enable `/bigobj` and `/experimental:c11atomics` on MSVC for all C translation units.
+- [ ] Verify path safety: ensure no unquoted path arguments are passed to child processes or toolchain CLI tools when workspace paths contain spaces.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: xbox-game-static-recomp
-description: Complete end-to-end playbook and standard operating procedure for statically recompiling original Xbox games to native PC (Windows, macOS, Linux/Steam Deck) using the xboxrecomp toolkit. Use when porting Xbox games, diagnosing bring-up crashes (S0-S4), configuring AOT analysis/lifting pipelines, implementing hardware MMIO shims (NV2A, APU, AC97), writing manual C overrides, handling indirect calls (ICALL), or adding modern PC enhancements (widescreen Hor+, 60fps, texture mods, controller input).
+description: Complete end-to-end playbook and standard operating procedure for statically recompiling original Xbox and classic console games to native PC (Windows, macOS, Linux/Steam Deck) using static recompilation toolchains (xboxrecomp, psxrecomp, N64Recomp). Use when porting console games, diagnosing bring-up crashes (S0-S4), solving MSVC compiler traps (C11 atomics, GCC built-ins, lambda constexpr), managing split-TU sharding, configuring AOT analysis/lifting pipelines, implementing hardware MMIO shims (NV2A, PSX GPU/SPU, APU, AC97), writing manual C overrides, handling indirect calls (ICALL), or adding modern PC enhancements (widescreen Hor+, 60fps, texture mods, controller input).
 ---
 
 # Xbox Game Static Recompilation Playbook
@@ -212,3 +212,65 @@ When game code reads/writes to unmapped registers (e.g. GPU sync or audio reset)
    Never commit copyrighted game screenshots to git. Instead, calculate mathematical frame signatures (bounding box, unique color count, pixel checksum) and verify with `frame-signature.py`.
 3. **Save Tree Isolation:**
    Always snapshot and restore the `save/` directory during automated test runs so regression tests remain reproducible.
+
+---
+
+## 8. Compiler Toolchain, MSVC Conformance & Platform Shims
+
+When compiling massive recompiled codebases (~500k to 1.5M+ lines of C/C++) on modern platforms (Windows MSVC, Linux GCC, macOS Clang), adhere to these strict toolchain rules:
+
+### A. MSVC C11 Atomics Configuration
+MSVC requires explicit enablement of C11 atomic primitives when runtime code includes `<stdatomic.h>`. Without this, MSVC aborts with `#error: "C atomic support is not enabled"`.
+In CMake, apply `/experimental:c11atomics` to all C translation units:
+```cmake
+if(MSVC)
+    get_target_property(_all_sources ${target} SOURCES)
+    foreach(_src IN LISTS _all_sources)
+        if(_src MATCHES "\\.c$")
+            set_property(SOURCE ${_src} APPEND PROPERTY COMPILE_OPTIONS /experimental:c11atomics)
+        endif()
+    endforeach()
+endif()
+```
+
+### B. Cross-Compiler Atomic Guards (Win32 Interlocked vs GCC Built-ins)
+Never use bare GCC/Clang built-ins like `__atomic_store_n` or `__ATOMIC_RELEASE` without MSVC fallbacks. Guard all cross-thread shared states:
+```c
+#if defined(_WIN32)
+    InterlockedExchange((volatile LONG*)&s_shared_state, (LONG)new_val);
+#else
+    __atomic_store_n(&s_shared_state, new_val, __ATOMIC_RELEASE);
+#endif
+```
+
+### C. C++17 Strict Conformance in Lambda Closures
+In MSVC strict C++17 mode, `static_assert` inside a lambda closure cannot read outer enclosing function `constexpr` local variables (`error C2131: expression did not evaluate to a constant`).
+- Re-declare `constexpr` locally within the lambda body, or evaluate compile-time boolean literals directly.
+
+### D. Subprocess Path Hygiene (Spaces in Directories)
+Never invoke toolchain subprocesses (such as BIOS lifters, disassemblers, or patchers) using raw unquoted string concatenation. Workspace directories frequently contain spaces (e.g., `C:\Project\Harvest Moon - Back to Nature (USA)`):
+- Always pass arguments as separate elements in an argument list (e.g. `subprocess.run(["tool.exe", "--config", path])`).
+- When executing sub-binaries in shell/PowerShell scripts, wrap all variable expansions in double quotes: `& "$Tool" --config "$ConfigPath"`.
+
+### E. Split-TU (Translation Unit) Sharding
+Always shard monolithic recompiled binaries into 15 to 20 files (`full_00.c` ... `full_19.c`) + a unified dispatch table. This:
+- Prevents MSVC compiler heap exhaustion (`C1002`).
+- Enables parallel multi-core compilation (`cmake --build build --config Release --parallel`).
+- Keeps object file symbols well below the 65,536 limit (pair with `/bigobj` on MSVC).
+
+---
+
+## 9. Universal Static Recompilation Principles (Xbox x86 & Console MIPS / PSX / N64)
+
+While original Xbox games target 32-bit x86 and PlayStation/N64 games target MIPS (R3000A / VR4300), modern static recompilers share the exact same foundational architecture:
+
+| Subsystem | Xbox (x86 - `xboxrecomp`) | PlayStation 1 (MIPS R3000A - `psxrecomp`) | N64 (MIPS VR4300 - `N64Recomp`) |
+| :--- | :--- | :--- | :--- |
+| **Instruction Decoding** | Variable-length x86 with prefix bytes | Fixed 32-bit MIPS instructions (1 delay slot) | Fixed 32-bit MIPS III / IV instructions |
+| **Function Discovery** | `CALL` / `RET` scanning + XDK library sections | `jr $ra` + prologue analysis (`addiu $sp, $sp, -imm`) | `jr $ra` + symbol heuristics |
+| **Branch Delay Slots** | None (direct branching) | 1-instruction delay slot emulation | 1-instruction delay slot emulation |
+| **Dispatch Model** | Flat direct array / hash dispatch table | Dense 32-bit dispatch table (`psx_unknown_dispatch`) | Binary search / direct function table |
+| **Kernel / BIOS** | Xbox Kernel HLE bridge (`xbox_kernel_init`) | Retail BIOS (SCPH1001) or OpenBIOS C recompilation | Ultra64 OS syscall replacement |
+| **Hardware Shim** | NV2A pushbuffer -> Direct3D 11 / Vulkan | GPU packets + GTE coprocessor -> SDL3 / OpenGL / D3D | RDP display lists -> modern graphics |
+| **Audio Subsystem** | APU / AC97 MMIO register trapping | SPU (24 ADPCM voices) + CD-DA audio stream | RCP / RSP audio microcode synthesis |
+
